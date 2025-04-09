@@ -66,7 +66,7 @@ def handle_message(event):
     get_user_history_msg = fdb.get('/chat', user_id)
     print('get_user_history_msg: ',get_user_history_msg)
 
-    //TODO: 超過24hrs的使用者紀錄刪除
+    #TODO: 超過24hrs的使用者紀錄刪除
     
     if isinstance(event.message, TextMessage):
         user_message = event.message.text
