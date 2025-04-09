@@ -125,7 +125,6 @@ def get_gemini_reply(messages):
       return "抱歉，我無法理解這個問題。"
 
 
-if __name__ == "__main__":
-    # app.run(host='localhost', port=5000)
-    app.run()
+# if __name__ == "__main__":
+    # app.run()
     #  app.run(host='0.0.0.0', port=10000)
