@@ -8,6 +8,7 @@ import sys
 from firebase import firebase
 import os
 from dotenv import load_dotenv
+import datetime
 
 # Load environment variables
 load_dotenv()
@@ -54,6 +55,8 @@ def handle_message(event):
     user_chat_path =  f'chat/{user_id}'
     user_message = event.message.text
     fdb = firebase.FirebaseApplication(FIREBASE_URL, None)
+    timestamp = datetime.datetime.utcnow().isoformat()
+
     # user_chat_history:list = fdb.get(user_chat_path, None)
     gemini_reply = get_gemini_reply(user_message)
 
@@ -61,7 +64,12 @@ def handle_message(event):
         reply_token,
         TextSendMessage(text=gemini_reply)
     )
-    fdb.put_async(user_chat_path, None)
+    try:
+      fdb.put(user_chat_path, timestamp, {"from": "user", "msg": user_message})
+      fdb.put(user_chat_path, timestamp + "_bot", {"from": "bot", "msg": gemini_reply})
+    except Exception as e:
+        print(f"Firebase error: {e}")
+
 
 # 呼叫 Gemini API 並回傳回應文字
 def get_gemini_reply(prompt):
@@ -71,12 +79,14 @@ def get_gemini_reply(prompt):
             "parts": [{"text": prompt}]
         }]
     }
-    response = requests.post(GEMINI_API_URL, headers=headers, json=data)
     try:
-        return response.json()["candidates"][0]["content"]["parts"][0]["text"]
-    except:
+        response = requests.post(GEMINI_API_URL, headers=headers, json=data)
+        res_json = response.json()
+        return res_json.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "無回應")
+    except Exception as e:
+        print(f"Gemini API error: {e}")
         return "抱歉，我無法理解這個問題。"
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
     # app.run()
-     app.run(host='0.0.0.0', port=10000)
+    #  app.run(host='0.0.0.0', port=10000)
