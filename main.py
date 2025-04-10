@@ -23,7 +23,6 @@ MODEL = os.environ.get("MODEL")
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 client = genai.Client(api_key=GEMINI_API_KEY)
-chat = client.chats.create(model=MODEL)
 fdb = firebase.FirebaseApplication(FIREBASE_URL, None)
 
 
@@ -131,7 +130,7 @@ def get_gemini_reply(messages):
   # prompt_format = f"user question: {prompt}, pls answers it in simple way. not more than 150 words each time. because we are using Line(one of the chat application)."
   try:
     response = client.models.generate_content(
-        model="gemini-2.0-flash",
+        model=MODEL,
         config=types.GenerateContentConfig(
             system_instruction="""
             You are a RPA assistant. We have a learning group will ask or discuss relevant topics. 
@@ -149,6 +148,6 @@ def get_gemini_reply(messages):
       return "抱歉，我無法理解這個問題。"
 
 
-if __name__ == "__main__":
-    app.run()
+# if __name__ == "__main__":
+    # app.run()
     #  app.run(host='0.0.0.0', port=10000)
